@@ -1,0 +1,6 @@
+*.html
+/data/
+/utexas/
+/texas_bar/
+*.csv
+*.readme.md.icloud
