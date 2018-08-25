@@ -1,19 +1,46 @@
 from bs4 import BeautifulSoup
 import sys
-sys.path.append('/private/var/mobile/Library/Mobile Documents/iCloud~com~omz-software~Pythonista3/Documents/util/')
+sys.path.append('/private/var/mobile/Library/Mobile Documents/iCloud~com~omz-software~Pythonista3/Documents/util/hellpaz/')
 
 from logg import LoggingPrinter,Loge
 
+
+# headers are .typeof(list()) == True/first item in stack
 
 headers = ["id", "Search term", 'Student name','First semester enrolled','Last semester enrolled','Degree']
 
 degree_headers = ['degree_name','Major name','Date degree received','Honors received','Special honors received','Degree notes']
 
 
-zipper_rows = list()
 
-zipper_rows.append(headers)
+class Stack:
+
+	def __init__(self):
+		self.items = []
+
+	def isEmpty(self):
+		return self.items == []
+		
+	def push(self, item):
+		self.items.append(item)
+		
+	def pop(self):
+		return self.items.pop()
+		
+	def peek(self):
+		return self.items[len(self.items)-1]
+
+	def size(self):
+		return len(self.items)
+	
+	def show(self):
+		return self.items
+
+zipper_rows = Stack()
+zipper_rows.push(headers)
+	
 count = 1
+table_header_count = 0
 
 import os,glob
 folder_path = os.getcwd()
@@ -65,7 +92,7 @@ with LoggingPrinter():
 	
 		
 						try:
-							major_name = student.select_one("td.major_name").text.strip()
+							major_name = student.select_one("td.major_name").text.split('major').strip()
 						except Exception as e:
 							with Loge(e):
 								pass
@@ -80,35 +107,121 @@ with LoggingPrinter():
 						except Exception as e:
 							with Loge(e):
 								pass
-	#					sp_honors = student.select_one("td.sp_honors").text.strip()
-	#					degree_date = student.select_one("td.degree_date").text.strip()
+						try:
+							sp_honors = student.select_one("td.sp_honors").text.strip()
+						except Exception as e:
+							with Loge(e):
+								pass
+						try:
+							degree_note = student.select_one("td.degree_note").text.strip()
+						except Exception as e:
+							with Loge(e):
+								pass
 	
 						#print("tr", student.td)
-						print('uuuuuuuuuuuuuuuh')
 					else:
-						print("elseelse", student)
-						print("666666666")
+						print("Following <td> in Student row returned 'None':\n\n\t)", student, "\n\nRow End.")
+						print()
 			else:
-				print("else", student)
-				print("'mmmmmmmmmmm'")
-				print()
+				table_header_count += 1
+				if str(student).startswith("<tr>"):
+					print("Skipped Table Header No. " + str(table_header_count))
+					print()
+				else:
+					print("Following row had no attrs:\n\n\t", student, "\n\nRow End.")
+					print()
 					
 			
-			degree_row = [degree_name, major_name, degree_date, honors, sp_honors, degree_note]
 			
-			print(honors)
-			print(degree_row)
+			#print(honors)
+			#print(degree_row)
 			
-							
-			student_row = [student_name, first_sem, last_sem, degree_row]
+			student_row = Stack()
+			degree_stack = Stack()
+			
+			if len(student_name) > 1:
+				degree_rows_stack = Stack()
+				student_row.push(count)
+				count += 1
+				for field in [student_name, last_sem, first_sem, degree_rows_stack]:
+					student_row.push(field)
+				
+				
+				
+				for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
+					if len(field) > 1:
+						if degree_stack.isEmpty() == True:
+							degree_stack.push(degree_headers)
+						break
+			
+				if degree_stack.isEmpty() == False:
+					
+					for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
+						degree_stack.push(field)
+						
+					degree_rows_stack = student_row.pop()
+					degree_rows_stack.push(degree_stack)
+					student_row.push(degree_rows_stack)
+
+
+				zipper_rows.push(student_row)
+			else:
+
+				for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
+					if len(field) > 1:
+						if degree_stack.isEmpty() == True:
+							degree_stack.push(degree_headers)
+						break
+			
+				if degree_stack.isEmpty() == False:
+					for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
+						degree_stack.push(field)
+						
+					
+					previous_entry = zipper_rows.pop()
+					degree_rows_stack = previous_entry.pop()
+					
+					degree_rows_stack.push(degree_stack)
+					
+					previous_entry.push(degree_rows_stack)
+					zipper_rows.push(previous_entry)
+					
+					print("Success:\n\n", degree_stack.show(), " >>> ", previous_entry.show(), " : ", previous_entry.peek().show(), "\n\nEnd\n")
+
+
+						
+				
 			
 			
-			zipper_rows.append(student_row)
+					
+				#else:
+					#print("Failure\n\n", degree_row, "\n\nEnd\n")
+					#pass
+#			except IndexError as e:
+#				print("Zipper Rows Empty")
+#				pass
+
+				
 			
 			
+	print()
 	print("final")
-	print(zipper_rows)	
-				#print(student)
+	#for row in zipper_rows:
+		#print(row)
+	for row in zipper_rows.show():
+		try:
+			student = row.show()
+			degrees = row.peek()
+			print("student", student)
+			print()
+			for degree in degrees.show():
+				print("\t\tdegree", degree.show())
+				print()
+			print()
+			print()
+		except:
+			print(row)
+	#print(student)
 				
 				
 #				print(student_name)
