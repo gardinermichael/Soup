@@ -1,9 +1,9 @@
-Scripts are expecting the scrapes HTML files to be in these folders:
+Scripts are expecting the scraped HTML files to be in these folders:
 
 		* "/data/utexas/"
 		* "/data/texas_bar/"
 
-Remove my helpers and unindent the main block to compensate:
+Remove the helpers and unindent the main block to compensate:
 		
 		* "hellpaz":
 			+ Loge (Dumps the error into a trio of loggers; JSON, Run History, Last Run Only)
