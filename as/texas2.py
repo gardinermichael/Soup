@@ -7,7 +7,9 @@ from logg import LoggingPrinter,Loge
 
 # headers are .typeof(list()) == True/first item in stack
 
-headers = ["id", "Search term", 'Student name','First semester enrolled','Last semester enrolled','Degree']
+# extranous fields due to latter change in implementation
+
+headers = ["id", "Search term", 'Student name','Last semester enrolled','First semester enrolled','Degree']
 
 degree_headers = ['degree_name','Major name','Date degree received','Honors received','Special honors received','Degree notes']
 
@@ -44,7 +46,7 @@ table_header_count = 0
 
 import os,glob
 folder_path = os.getcwd()
-folder_path += "/utexas/"
+folder_path += "/data/utexas/"
 
 with LoggingPrinter():
 	for filename in os.listdir(folder_path):
@@ -211,51 +213,110 @@ with LoggingPrinter():
 #			print(row)
 
 
-		csv_rows = list()
-		
-		for row in zipper_rows.show():
-			try:
+#		csv_rows = list()
+#		
+#		for row in zipper_rows.show():
+#			try:
+#				student_list = list()
+#				student_stack = row.show()
+#				for item in student_stack:
+#					student_list.append(item)
+#				
+#				degrees_list = list()
+#				degrees_stack = student_list.pop()
+#				
+#									
+#				for degree in degrees_stack.show():
+#					
+#					degree_list = list()
+#					try:
+#						print(degree.size())
+#						print(degrees_stack.size())
+#						print("degree show", degree.show())
+#						degrees_list.append(degree.show())
+#					except:
+#						print("degree", degree)
+#						degrees_list.append(degree)
+#					#degrees_list.append(degree_list)
+#
+#
+#						
+#				student_list.append(degrees_list)
+#
+#
+#
+#	
+#	
+#				csv_rows.append(student_list)
+#			except:
+#				header_list = row
+#				csv_rows.append(header_list)
+#		
+#
+#		
+#		print(csv_rows)
+
+	csv_rows = list()
+	column_length = 0
+	
+	for row in zipper_rows.show():
+		try:
+			if row.size() > column_length:
+				column_length = row.size()
+			if row.peek().size() > column_length:
+						column_length = row.peek().size()
+			print(column_length)
+		except Exception as e:
+			print(e)
+			pass
+
+
+	for row in zipper_rows.show():
+		try:
 				student_list = list()
 				student_stack = row.show()
 				for item in student_stack:
 					student_list.append(item)
 				
-				degrees_list = list()
-				degrees_stack = student_list.pop()
+				try:
+					degrees_stack = student_list.pop()
+					for degree in degrees_stack.show():
+						try:
+							for item in degree.show():
+								student_list.append(item)
+						except AttributeError:
+							# not-needed Header row used in nested csv implementation
+							pass
+				except AttributeError:
+					pass
 				
-									
-				for degree in degrees_stack.show():
-					
-					degree_list = list()
-					try:
-						print(degree.size())
-						print(degrees_stack.size())
-						print("degree show", degree.show())
-						degrees_list.append(degree.show())
-					except:
-						print("degree", degree)
-						degrees_list.append(degree)
-					#degrees_list.append(degree_list)
-
-
-						
-				student_list.append(degrees_list)
-
-
-
-	
+				try:
+					for i in range((degrees_stack.size()-1), ((column_length-1)*6)):
+						student_list.append("")
+				except AttributeError:
+					pass
 	
 				csv_rows.append(student_list)
-			except:
-				header_list = row
-				csv_rows.append(header_list)
-		
 
 		
-		print(csv_rows)
+		
+		except AttributeError as e:
+			row.pop()
+			for i in range(0, column_length-1):
+				for field in ["Degree Name", "Major Name", "Degree Date", "Honors", "SP Honors", "Degree Notes"]:
+					row.append(str(field))
+			csv_rows.append(row)
+			pass
+
+
+#print(degree.size())
+#						print(degrees_stack.size())
+#						print("degree show", degree.show())
+#						degrees_list.append(degree.show())
+
 
 import csv
-with open('utexas.csv', 'a', newline='\n', encoding='utf-8') as csvfile:
+with open('utexas.csv', 'w', newline='\n', encoding='utf-8') as csvfile:
 	csv_writer = csv.writer(csvfile, lineterminator='\n', quoting=csv.QUOTE_NONNUMERIC)
 
 	

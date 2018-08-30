@@ -67,7 +67,7 @@ duplicate_full_check = list()
 
 import os,glob
 folder_path = os.getcwd()
-folder_path += "/texas_bar/"
+folder_path += "/data/texas_bar/"
 
 
 for filename in os.listdir(folder_path):

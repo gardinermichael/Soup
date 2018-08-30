@@ -1,5 +1,6 @@
 *.html
 /as/data/
+/as/data/*
 /as/utexas/
 /as/texas_bar/
 *.csv
