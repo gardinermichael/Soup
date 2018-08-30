@@ -133,14 +133,12 @@ with LoggingPrinter():
 					
 			
 			
-			#print(honors)
-			#print(degree_row)
-			
 			student_row = Stack()
 			degree_stack = Stack()
 			
 			if len(student_name) > 1:
 				degree_rows_stack = Stack()
+				degree_rows_stack.push(degree_headers)
 				student_row.push(count)
 				count += 1
 				for field in [student_name, last_sem, first_sem, degree_rows_stack]:
@@ -150,18 +148,13 @@ with LoggingPrinter():
 				
 				for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
 					if len(field) > 1:
-						if degree_stack.isEmpty() == True:
-							degree_stack.push(degree_headers)
+						for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
+							degree_stack.push(field)
+						degree_rows_stack = student_row.pop()
+						degree_rows_stack.push(degree_stack)
+						student_row.push(degree_rows_stack)
 						break
-			
-				if degree_stack.isEmpty() == False:
-					
-					for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
-						degree_stack.push(field)
 						
-					degree_rows_stack = student_row.pop()
-					degree_rows_stack.push(degree_stack)
-					student_row.push(degree_rows_stack)
 
 
 				zipper_rows.push(student_row)
@@ -169,24 +162,19 @@ with LoggingPrinter():
 
 				for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
 					if len(field) > 1:
-						if degree_stack.isEmpty() == True:
-							degree_stack.push(degree_headers)
+						for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
+							degree_stack.push(field)
+						
+						previous_entry = zipper_rows.pop()
+						degree_rows_stack = previous_entry.pop()
+						degree_rows_stack.push(degree_stack)
+						previous_entry.push(degree_rows_stack)
+						zipper_rows.push(previous_entry)
+						
+					
+						print("Success:\n\n", degree_stack.show(), " >>> ", previous_entry.show(), " : ", previous_entry.peek().show(), "\n\nEnd\n")
+						
 						break
-			
-				if degree_stack.isEmpty() == False:
-					for field in [degree_name, major_name, degree_date, honors, sp_honors, degree_note]:
-						degree_stack.push(field)
-						
-					
-					previous_entry = zipper_rows.pop()
-					degree_rows_stack = previous_entry.pop()
-					
-					degree_rows_stack.push(degree_stack)
-					
-					previous_entry.push(degree_rows_stack)
-					zipper_rows.push(previous_entry)
-					
-					print("Success:\n\n", degree_stack.show(), " >>> ", previous_entry.show(), " : ", previous_entry.peek().show(), "\n\nEnd\n")
 
 
 						
@@ -194,59 +182,88 @@ with LoggingPrinter():
 			
 			
 					
-				#else:
-					#print("Failure\n\n", degree_row, "\n\nEnd\n")
-					#pass
-#			except IndexError as e:
-#				print("Zipper Rows Empty")
+#			else:
+#				print("Failure\n\n", degree_row, "\n\nEnd\n")
 #				pass
+#			except IndexError as e:
+#						print("Zipper Rows Empty")
+#						pass
+
+
 
 				
 			
 			
-	print()
-	print("final")
-	#for row in zipper_rows:
-		#print(row)
-	for row in zipper_rows.show():
-		try:
-			student = row.show()
-			degrees = row.peek()
-			print("student", student)
-			print()
-			for degree in degrees.show():
-				print("\t\tdegree", degree.show())
-				print()
-			print()
-			print()
-		except:
-			print(row)
-	#print(student)
-				
-				
-#				print(student_name)
-#				print(first_sem)
-#				print(last_sem)
-##				for descendant in student.descendants:
-##					print("c", descendant)
+#	print()
+#	print("final")
+#	for row in zipper_rows.show():
+#		try:
+#			student = row.show()
+#			degrees = row.peek()
+#			print("student", student)
+#			print()
+#			for degree in degrees.show():
+#				print("\t\tdegree", degree.show())
+#				print()
+#			print()
+#			print()
+#		except:
+#			print(row)
 
-#					if len(descendant.attrs) > 0:
-#						print(child.attrs)
-#						result_class = str(child.attrs['class'])[2:-2]
-#						result_text = str(child.text).strip()
-#						if result_class == "student_name":
-#						#student_row.append(result_text)
-#							student_name = result_text.strip()
-#						elif result_class == 'first_sem':
-#							#student_row.append(result_text[15:].strip())
-#							first_sem = result_text[15:].strip()
-#						elif result_class == 'last_sem':
-#							#student_row.append(result_text[15:].strip())
-#							last_sem = result_text[15:].strip()
+
+		csv_rows = list()
+		
+		for row in zipper_rows.show():
+			try:
+				student_list = list()
+				student_stack = row.show()
+				for item in student_stack:
+					student_list.append(item)
+				
+				degrees_list = list()
+				degrees_stack = student_list.pop()
+				
+									
+				for degree in degrees_stack.show():
+					
+					degree_list = list()
+					try:
+						print(degree.size())
+						print(degrees_stack.size())
+						print("degree show", degree.show())
+						degrees_list.append(degree.show())
+					except:
+						print("degree", degree)
+						degrees_list.append(degree)
+					#degrees_list.append(degree_list)
+
+
+						
+				student_list.append(degrees_list)
+
+
+
+	
+	
+				csv_rows.append(student_list)
+			except:
+				header_list = row
+				csv_rows.append(header_list)
+		
 
 		
+		print(csv_rows)
+
+import csv
+with open('utexas.csv', 'a', newline='\n', encoding='utf-8') as csvfile:
+	csv_writer = csv.writer(csvfile, lineterminator='\n', quoting=csv.QUOTE_NONNUMERIC)
+
+	
+		#	csv_rows.append(student_list)
 		
-		
+
+	csv_writer.writerows(csv_rows)
+
 	
 		
 	
