@@ -44,9 +44,12 @@ zipper_rows.push(headers)
 count = 1
 table_header_count = 0
 
+import re
 import os,glob
 folder_path = os.getcwd()
 folder_path += "/data/utexas/"
+
+
 
 with LoggingPrinter():
 	for filename in os.listdir(folder_path):
@@ -54,6 +57,9 @@ with LoggingPrinter():
 		html = open(file_path, 'r', encoding='utf-8')
 		soup = BeautifulSoup(html, "html5lib")
 		
+		search_term = str(soup.find(string=re.compile("Search results beginning with")))
+		
+		search_term = search_term.lstrip("Search results beginning with").rstrip(":").strip()
 		
 		students = soup.select('tr[class="student_main_info"]')
 		
@@ -143,7 +149,7 @@ with LoggingPrinter():
 				degree_rows_stack.push(degree_headers)
 				student_row.push(count)
 				count += 1
-				for field in [student_name, last_sem, first_sem, degree_rows_stack]:
+				for field in [search_term, student_name, last_sem, first_sem, degree_rows_stack]:
 					student_row.push(field)
 				
 				
